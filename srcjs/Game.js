@@ -1,25 +1,8 @@
-import { GameField, IGameField } from './GameField';
-import { GameView, IGameView } from './GameView';
-import { Cell } from './types/Cell';
-
-export interface IGame {
-  startGame(): void;
-  stopGame(): void;
-  updateGame(): void;
-  checkStopConditionZero(arg: number[][]): boolean;
-}
-export class Game implements IGame {
-  private gameField: GameField;
-  private gameView: GameView;
-  private field: Cell[][];
-  private intervalId?: NodeJS.Timeout;
-  private intervalTime: number;
-
-  constructor(
-    gameField: IGameField,
-    gameView: IGameView,
-    intervalTime?: number,
-  ) {
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+exports.Game = void 0;
+class Game {
+  constructor(gameField, gameView, intervalTime) {
     this.gameField = gameField;
     this.gameView = gameView;
     this.field = gameField.getState();
@@ -33,16 +16,14 @@ export class Game implements IGame {
       height: this.field.length,
       isRunning: false,
     };
-
     this.gameView.updateGameField(this.field);
     this.gameView.updateGameState(initialState);
-
-    this.gameView.onCellClick((x: number, y: number) => {
+    this.gameView.onCellClick((x, y) => {
       this.gameField.toggleCellState(x, y);
       this.field = this.gameField.getState();
       this.gameView.updateGameField(this.field);
     });
-    this.gameView.onFieldSizeChange((width: number, height: number) => {
+    this.gameView.onFieldSizeChange((width, height) => {
       this.gameField.setSize(width, height);
       const newField = this.gameField.getState();
       this.gameView.updateGameField(newField);
@@ -52,8 +33,7 @@ export class Game implements IGame {
         isRunning: false,
       });
     });
-
-    this.gameView.onGameStateChange((isRunning: boolean) => {
+    this.gameView.onGameStateChange((isRunning) => {
       if (isRunning) {
         this.startGame();
       } else {
@@ -72,22 +52,19 @@ export class Game implements IGame {
       }, this.intervalTime);
     }
   }
-
   stopGame() {
     this.gameView.updateGameState({ isRunning: false });
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
   }
-
   updateGame() {
     this.gameField.nextGeneration();
     this.field = this.gameField.getState();
     this.gameView.updateGameField(this.field);
   }
-
   checkStopConditionZero() {
-    let count: number = 0;
+    let count = 0;
     for (let i = 0; i < this.field.length; i++) {
       for (let j = 0; j < this.field[i].length; j++) {
         if (this.field[i][j] !== 0) {
@@ -98,3 +75,4 @@ export class Game implements IGame {
     return count === 0;
   }
 }
+exports.Game = Game;

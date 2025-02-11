@@ -1,27 +1,25 @@
-import { GameField } from './GameField';
-
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+const GameField_1 = require('./GameField');
 describe('GameField', () => {
   describe('public interface', () => {
     it('is a class', () => {
-      expect(GameField).toBeInstanceOf(Function);
-      expect(new GameField()).toBeInstanceOf(GameField);
+      expect(GameField_1.GameField).toBeInstanceOf(Function);
+      expect(new GameField_1.GameField()).toBeInstanceOf(GameField_1.GameField);
     });
-
     it('has a function getState', () => {
-      const gameField = new GameField();
+      const gameField = new GameField_1.GameField();
       expect(gameField.getState).toBeInstanceOf(Function);
       expect(gameField.getState()).toEqual([[]]);
     });
   });
-
   describe('functional tests', () => {
     const width = 2;
     const height = 3;
-    let gameField: GameField;
+    let gameField;
     beforeEach(() => {
-      gameField = new GameField(width, height);
+      gameField = new GameField_1.GameField(width, height);
     });
-
     it('supports settings side from constructor', () => {
       expect(gameField.getState()).toEqual([
         [0, 0],
@@ -29,7 +27,6 @@ describe('GameField', () => {
         [0, 0],
       ]);
     });
-
     it('has .toggleCellState method', () => {
       expect(gameField.toggleCellState).toBeInstanceOf(Function);
       const [x1, y1] = [0, 0];
@@ -48,7 +45,6 @@ describe('GameField', () => {
         [0, 0],
       ]);
     });
-
     it('has method .nextGeneration', () => {
       expect(gameField.nextGeneration).toBeInstanceOf(Function);
       const [x1, y1] = [0, 0];
@@ -81,7 +77,6 @@ describe('GameField', () => {
         [0, 0],
       ]);
     });
-
     it('has method .setSize(newWidth, newHeight)', () => {
       gameField.toggleCellState(0, 0);
       gameField.toggleCellState(1, 1);

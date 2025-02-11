@@ -1,24 +1,23 @@
-import { GameView } from './GameView';
-
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+const GameView_1 = require('./GameView');
 describe('GameView', () => {
-  let el: HTMLElement;
+  let el;
   beforeEach(() => {
     el = document.createElement('div');
   });
   describe('public interface', () => {
     it('is a class', () => {
-      expect(GameView).toBeInstanceOf(Function);
-      expect(new GameView(el)).toBeInstanceOf(GameView);
+      expect(GameView_1.GameView).toBeInstanceOf(Function);
+      expect(new GameView_1.GameView(el)).toBeInstanceOf(GameView_1.GameView);
     });
-
     it('renders some inital markup on construction', () => {
-      new GameView(el);
+      new GameView_1.GameView(el);
       expect(el.querySelector('.gameField')).not.toBeNull();
       expect(el.querySelector('.gameControls')).not.toBeNull();
     });
-
     it('has public methods', () => {
-      const gameView = new GameView(el);
+      const gameView = new GameView_1.GameView(el);
       expect(gameView.updateGameField).toBeInstanceOf(Function);
       expect(gameView.updateGameState).toBeInstanceOf(Function);
       expect(gameView.onCellClick).toBeInstanceOf(Function);
@@ -26,11 +25,10 @@ describe('GameView', () => {
       expect(gameView.onFieldSizeChange).toBeInstanceOf(Function);
     });
   });
-
   describe('functional interface', () => {
-    let gameView: GameView;
+    let gameView;
     beforeEach(() => {
-      gameView = new GameView(el);
+      gameView = new GameView_1.GameView(el);
     });
     it('renders field from .updateGameField', () => {
       gameView.updateGameField([
@@ -56,17 +54,20 @@ describe('GameView', () => {
       expect(el.querySelectorAll('.cell.cell--dead').length).toBe(3);
     });
     it('calls funciton from .onCellClick on field interaction', () => {
+      var _a;
       const onCellClick = jest.fn();
       gameView.onCellClick(onCellClick);
       gameView.updateGameField([
         [0, 0],
         [1, 0],
       ]);
-      el.querySelector('.cell.cell--alive')?.dispatchEvent(
-        new Event('click', {
-          bubbles: true,
-        }),
-      );
+      (_a = el.querySelector('.cell.cell--alive')) === null || _a === void 0
+        ? void 0
+        : _a.dispatchEvent(
+            new Event('click', {
+              bubbles: true,
+            }),
+          );
       expect(onCellClick).toHaveBeenCalledWith(0, 1);
       el.querySelectorAll('.cell.cell--dead')[1].dispatchEvent(
         new Event('click', {
@@ -76,34 +77,35 @@ describe('GameView', () => {
       expect(onCellClick).toHaveBeenCalledWith(1, 0);
     });
     it('renders correct game state on .updateGameState', () => {
+      var _a, _b, _c;
       expect(
         el.querySelector('.run-button.run-button--stopped'),
       ).not.toBeNull();
       expect(
-        el.querySelector('.run-button.run-button--stopped')?.innerHTML,
+        (_a = el.querySelector('.run-button.run-button--stopped')) === null ||
+          _a === void 0
+          ? void 0
+          : _a.innerHTML,
       ).toBe('Play');
       gameView.updateGameState({ isRunning: true, width: 3, height: 3 });
       expect(el.querySelector('.run-button.run-button--stopped')).toBeNull();
       expect(el.querySelector('.run-button.run-button--runned')).not.toBeNull();
       expect(
-        el.querySelector('.run-button.run-button--runned')?.innerHTML,
+        (_b = el.querySelector('.run-button.run-button--runned')) === null ||
+          _b === void 0
+          ? void 0
+          : _b.innerHTML,
       ).toBe('Stop');
       expect(
         Number(
-          (
-            el.querySelector(
-              "input[type='number'].field-size.field-size--width",
-            ) as HTMLInputElement
-          ).value,
+          el.querySelector("input[type='number'].field-size.field-size--width")
+            .value,
         ),
       ).toBe(3);
       expect(
         Number(
-          (
-            el.querySelector(
-              "input[type='number'].field-size.field-size--height",
-            ) as HTMLInputElement
-          ).value,
+          el.querySelector("input[type='number'].field-size.field-size--height")
+            .value,
         ),
       ).toBe(3);
       gameView.updateGameState({ isRunning: false, width: 5, height: 6 });
@@ -111,68 +113,65 @@ describe('GameView', () => {
         el.querySelector('.run-button.run-button--stopped'),
       ).not.toBeNull();
       expect(
-        el.querySelector('.run-button.run-button--stopped')?.innerHTML,
+        (_c = el.querySelector('.run-button.run-button--stopped')) === null ||
+          _c === void 0
+          ? void 0
+          : _c.innerHTML,
       ).toBe('Play');
       expect(
         Number(
-          (
-            el.querySelector(
-              "input[type='number'].field-size.field-size--width",
-            ) as HTMLInputElement
-          ).value,
+          el.querySelector("input[type='number'].field-size.field-size--width")
+            .value,
         ),
       ).toBe(5);
       expect(
         Number(
-          (
-            el.querySelector(
-              "input[type='number'].field-size.field-size--height",
-            ) as HTMLInputElement
-          ).value,
+          el.querySelector("input[type='number'].field-size.field-size--height")
+            .value,
         ),
       ).toBe(6);
     });
     it('calls function from .onGameStateChange on control interaction', () => {
+      var _a, _b;
       const onGameStateChange = jest.fn();
       gameView.onGameStateChange(onGameStateChange);
       gameView.updateGameState({ isRunning: true, width: 2, height: 1 });
-      el.querySelector('.run-button.run-button--runned')?.dispatchEvent(
-        new Event('click', {
-          bubbles: true,
-        }),
-      );
+      (_a = el.querySelector('.run-button.run-button--runned')) === null ||
+      _a === void 0
+        ? void 0
+        : _a.dispatchEvent(
+            new Event('click', {
+              bubbles: true,
+            }),
+          );
       expect(onGameStateChange).toHaveBeenCalledWith(false);
       gameView.updateGameState({ isRunning: false, width: 2, height: 1 });
-      el.querySelector('.run-button.run-button--stopped')?.dispatchEvent(
-        new Event('click', {
-          bubbles: true,
-        }),
-      );
+      (_b = el.querySelector('.run-button.run-button--stopped')) === null ||
+      _b === void 0
+        ? void 0
+        : _b.dispatchEvent(
+            new Event('click', {
+              bubbles: true,
+            }),
+          );
       expect(onGameStateChange).toHaveBeenCalledWith(true);
     });
     it('calls onFieldSizeChange on field size change interaction', () => {
       const onFieldSizeChange = jest.fn();
       gameView.onFieldSizeChange(onFieldSizeChange);
-
       [
         [33, 66],
         [22, 12],
         [1, 2],
       ].forEach(([width, height]) => {
-        (
-          el.querySelector(
-            "input[type='number'].field-size.field-size--width",
-          ) as HTMLInputElement
+        el.querySelector(
+          "input[type='number'].field-size.field-size--width",
         ).value = `${width}`;
-        (
-          el.querySelector(
-            "input[type='number'].field-size.field-size--height",
-          ) as HTMLInputElement
+        el.querySelector(
+          "input[type='number'].field-size.field-size--height",
         ).value = `${height}`;
-        (
-          el.querySelector(
-            "input[type='number'].field-size.field-size--width",
-          ) as HTMLInputElement
+        el.querySelector(
+          "input[type='number'].field-size.field-size--width",
         ).dispatchEvent(
           new Event('change', {
             bubbles: true,
@@ -180,26 +179,19 @@ describe('GameView', () => {
         );
         expect(onFieldSizeChange).toHaveBeenCalledWith(width, height);
       });
-
       [
         [101, 103],
         [104, 105],
         [106, 107],
       ].forEach(([width, height]) => {
-        (
-          el.querySelector(
-            "input[type='number'].field-size.field-size--width",
-          ) as HTMLInputElement
+        el.querySelector(
+          "input[type='number'].field-size.field-size--width",
         ).value = `${width}`;
-        (
-          el.querySelector(
-            "input[type='number'].field-size.field-size--height",
-          ) as HTMLInputElement
+        el.querySelector(
+          "input[type='number'].field-size.field-size--height",
         ).value = `${height}`;
-        (
-          el.querySelector(
-            "input[type='number'].field-size.field-size--height",
-          ) as HTMLInputElement
+        el.querySelector(
+          "input[type='number'].field-size.field-size--height",
         ).dispatchEvent(
           new Event('change', {
             bubbles: true,

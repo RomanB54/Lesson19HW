@@ -1,0 +1,10 @@
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+const Game_1 = require('./Game');
+const GameField_1 = require('./GameField');
+const GameView_1 = require('./GameView');
+require('./styles.css');
+const el = document.getElementById('app');
+const gameView = new GameView_1.GameView(el);
+const gameField = new GameField_1.GameField(5, 5);
+new Game_1.Game(gameField, gameView, 1000);
