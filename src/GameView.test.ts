@@ -21,9 +21,11 @@ describe('GameView', () => {
       const gameView = new GameView(el);
       expect(gameView.updateGameField).toBeInstanceOf(Function);
       expect(gameView.updateGameState).toBeInstanceOf(Function);
+      expect(gameView.updateSingleCell).toBeInstanceOf(Function);
       expect(gameView.onCellClick).toBeInstanceOf(Function);
       expect(gameView.onGameStateChange).toBeInstanceOf(Function);
       expect(gameView.onFieldSizeChange).toBeInstanceOf(Function);
+      expect(gameView.onGameSpeedChange).toBeInstanceOf(Function);
     });
   });
 
@@ -55,7 +57,23 @@ describe('GameView', () => {
       expect(el.querySelectorAll('.cell.cell--alive').length).toBe(3);
       expect(el.querySelectorAll('.cell.cell--dead').length).toBe(3);
     });
-    it('calls funciton from .onCellClick on field interaction', () => {
+    it('update cell state from .updateSingleCell', () => {
+      gameView.updateGameField([
+        [0, 1],
+        [1, 0],
+      ]);
+      gameView.updateSingleCell(0, 0);
+      expect(el.querySelectorAll('.cell').length).toBe(4);
+      expect(el.querySelectorAll('.cell.cell--alive').length).toBe(3);
+      expect(el.querySelectorAll('.cell.cell--dead').length).toBe(1);
+
+      gameView.updateSingleCell(0, 1);
+      expect(el.querySelectorAll('.cell').length).toBe(4);
+      expect(el.querySelectorAll('.cell.cell--alive').length).toBe(2);
+      expect(el.querySelectorAll('.cell.cell--dead').length).toBe(2);
+    });
+
+    it('calls function from .onCellClick on field interaction', () => {
       const onCellClick = jest.fn();
       gameView.onCellClick(onCellClick);
       gameView.updateGameField([
@@ -82,7 +100,12 @@ describe('GameView', () => {
       expect(
         el.querySelector('.run-button.run-button--stopped')?.innerHTML,
       ).toBe('Play');
-      gameView.updateGameState({ isRunning: true, width: 3, height: 3 });
+      gameView.updateGameState({
+        isRunning: true,
+        width: 3,
+        height: 3,
+        speed: 2000,
+      });
       expect(el.querySelector('.run-button.run-button--stopped')).toBeNull();
       expect(el.querySelector('.run-button.run-button--runned')).not.toBeNull();
       expect(
@@ -106,7 +129,18 @@ describe('GameView', () => {
           ).value,
         ),
       ).toBe(3);
-      gameView.updateGameState({ isRunning: false, width: 5, height: 6 });
+      expect(
+        Number(
+          (el.querySelector("input[type='number'].speed") as HTMLInputElement)
+            .value,
+        ),
+      ).toBe(2000);
+      gameView.updateGameState({
+        isRunning: false,
+        width: 5,
+        height: 6,
+        speed: 12000,
+      });
       expect(
         el.querySelector('.run-button.run-button--stopped'),
       ).not.toBeNull();
@@ -131,6 +165,12 @@ describe('GameView', () => {
           ).value,
         ),
       ).toBe(6);
+      expect(
+        Number(
+          (el.querySelector("input[type='number'].speed") as HTMLInputElement)
+            .value,
+        ),
+      ).toBe(10000);
     });
     it('calls function from .onGameStateChange on control interaction', () => {
       const onGameStateChange = jest.fn();
@@ -206,6 +246,47 @@ describe('GameView', () => {
           }),
         );
         expect(onFieldSizeChange).toHaveBeenCalledWith(width, height);
+      });
+    });
+    it('check function to validate number for main parameters', () => {
+      const temp = gameView.validateNumber(12000, 1, 10000);
+      const temp2 = gameView.validateNumber(10, 20, 1000);
+      const temp3 = gameView.validateNumber(undefined, 30, 1000);
+      expect(temp).toBe(10000);
+      expect(temp2).toBe(20);
+      expect(temp3).toBe(30);
+    });
+
+    it('calls onGameSpeedChange on speed change interaction', () => {
+      const onGameSpeedChange = jest.fn();
+      gameView.onGameSpeedChange(onGameSpeedChange);
+
+      [[1000], [2000], [3000]].forEach(([speed]) => {
+        (
+          el.querySelector("input[type='number'].speed") as HTMLInputElement
+        ).value = `${speed}`;
+        (
+          el.querySelector("input[type='number'].speed") as HTMLInputElement
+        ).dispatchEvent(
+          new Event('change', {
+            bubbles: true,
+          }),
+        );
+        expect(onGameSpeedChange).toHaveBeenCalledWith(speed);
+      });
+
+      [[4000], [5000], [6000]].forEach(([speed]) => {
+        (
+          el.querySelector("input[type='number'].speed") as HTMLInputElement
+        ).value = `${speed}`;
+        (
+          el.querySelector("input[type='number'].speed") as HTMLInputElement
+        ).dispatchEvent(
+          new Event('change', {
+            bubbles: true,
+          }),
+        );
+        expect(onGameSpeedChange).toHaveBeenCalledWith(speed);
       });
     });
   });

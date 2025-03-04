@@ -12,8 +12,11 @@ export class Game implements IGame {
   private gameField: GameField;
   private gameView: GameView;
   private field: Cell[][];
-  private intervalId?: NodeJS.Timeout;
+  private intervalId?: NodeJS.Timeout | null = null;
   private intervalTime: number;
+  private isRunning: boolean = false;
+  private width: number;
+  private height: number;
 
   constructor(
     gameField: IGameField,
@@ -28,55 +31,79 @@ export class Game implements IGame {
     } else {
       this.intervalTime = intervalTime;
     }
-    const initialState = {
-      width: this.field[0].length,
-      height: this.field.length,
+    this.width = this.field[0].length;
+    this.height = this.field.length;
+
+    gameView.updateGameField(this.field);
+    gameView.updateGameState({
+      width: this.width,
+      height: this.height,
+      speed: this.intervalTime,
       isRunning: false,
-    };
-
-    this.gameView.updateGameField(this.field);
-    this.gameView.updateGameState(initialState);
-
-    this.gameView.onCellClick((x: number, y: number) => {
-      this.gameField.toggleCellState(x, y);
-      this.field = this.gameField.getState();
-      this.gameView.updateGameField(this.field);
     });
-    this.gameView.onFieldSizeChange((width: number, height: number) => {
-      this.gameField.setSize(width, height);
-      const newField = this.gameField.getState();
-      this.gameView.updateGameField(newField);
-      this.gameView.updateGameState({
-        width,
-        height,
-        isRunning: false,
+
+    gameView.onCellClick((x: number, y: number) => {
+      gameField.toggleCellState(x, y);
+      this.field = gameField.getState();
+      gameView.updateSingleCell(x, y);
+    });
+    gameView.onFieldSizeChange((widthX: number, heightY: number) => {
+      gameField.setSize(widthX, heightY);
+      const newField = gameField.getState();
+      this.width = newField[0].length;
+      this.height = newField.length;
+      gameView.updateGameField(newField);
+      gameView.updateGameState({
+        width: this.width,
+        height: this.height,
+        speed: this.intervalTime,
+        isRunning: this.isRunning,
+      });
+    });
+    gameView.onGameSpeedChange((newSpeed: number) => {
+      this.intervalTime = newSpeed;
+      gameView.updateGameState({
+        width: this.width,
+        height: this.height,
+        speed: this.intervalTime,
+        isRunning: this.isRunning,
       });
     });
 
-    this.gameView.onGameStateChange((isRunning: boolean) => {
+    gameView.onGameStateChange((isRunning: boolean) => {
       if (isRunning) {
+        gameView.updateGameState({
+          isRunning: true,
+          width: this.width,
+          height: this.height,
+        });
         this.startGame();
+        this.isRunning = true;
       } else {
+        gameView.updateGameState({
+          isRunning: false,
+          width: this.width,
+          height: this.height,
+        });
         this.stopGame();
+        this.isRunning = false;
       }
     });
   }
+
   startGame() {
-    this.gameView.updateGameState({ isRunning: true });
-    if (!this.intervalId) {
-      this.intervalId = setInterval(() => {
-        this.updateGame();
-        if (this.checkStopConditionZero()) {
-          this.stopGame();
-        }
-      }, this.intervalTime);
-    }
+    this.stopGame();
+    this.intervalId = setInterval(() => {
+      this.updateGame();
+    }, this.intervalTime);
   }
 
   stopGame() {
-    this.gameView.updateGameState({ isRunning: false });
     if (this.intervalId) {
       clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.field = this.gameField.getState();
+      this.gameView.updateGameField(this.field);
     }
   }
 
@@ -91,7 +118,7 @@ export class Game implements IGame {
     for (let i = 0; i < this.field.length; i++) {
       for (let j = 0; j < this.field[i].length; j++) {
         if (this.field[i][j] !== 0) {
-          count = +1;
+          count += 1;
         }
       }
     }

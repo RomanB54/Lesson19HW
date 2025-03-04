@@ -3,6 +3,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
 exports.Game = void 0;
 class Game {
   constructor(gameField, gameView, intervalTime) {
+    this.intervalId = null;
+    this.isRunning = false;
     this.gameField = gameField;
     this.gameView = gameView;
     this.field = gameField.getState();
@@ -11,51 +13,74 @@ class Game {
     } else {
       this.intervalTime = intervalTime;
     }
-    const initialState = {
-      width: this.field[0].length,
-      height: this.field.length,
+    this.width = this.field[0].length;
+    this.height = this.field.length;
+    gameView.updateGameField(this.field);
+    gameView.updateGameState({
+      width: this.width,
+      height: this.height,
+      speed: this.intervalTime,
       isRunning: false,
-    };
-    this.gameView.updateGameField(this.field);
-    this.gameView.updateGameState(initialState);
-    this.gameView.onCellClick((x, y) => {
-      this.gameField.toggleCellState(x, y);
-      this.field = this.gameField.getState();
-      this.gameView.updateGameField(this.field);
     });
-    this.gameView.onFieldSizeChange((width, height) => {
-      this.gameField.setSize(width, height);
-      const newField = this.gameField.getState();
-      this.gameView.updateGameField(newField);
-      this.gameView.updateGameState({
-        width,
-        height,
-        isRunning: false,
+    gameView.onCellClick((x, y) => {
+      gameField.toggleCellState(x, y);
+      this.field = gameField.getState();
+      gameView.updateSingleCell(x, y);
+    });
+    gameView.onFieldSizeChange((widthX, heightY) => {
+      gameField.setSize(widthX, heightY);
+      const newField = gameField.getState();
+      this.width = newField[0].length;
+      this.height = newField.length;
+      gameView.updateGameField(newField);
+      gameView.updateGameState({
+        width: this.width,
+        height: this.height,
+        speed: this.intervalTime,
+        isRunning: this.isRunning,
       });
     });
-    this.gameView.onGameStateChange((isRunning) => {
+    gameView.onGameSpeedChange((newSpeed) => {
+      this.intervalTime = newSpeed;
+      gameView.updateGameState({
+        width: this.width,
+        height: this.height,
+        speed: this.intervalTime,
+        isRunning: this.isRunning,
+      });
+    });
+    gameView.onGameStateChange((isRunning) => {
       if (isRunning) {
+        gameView.updateGameState({
+          isRunning: true,
+          width: this.width,
+          height: this.height,
+        });
         this.startGame();
+        this.isRunning = true;
       } else {
+        gameView.updateGameState({
+          isRunning: false,
+          width: this.width,
+          height: this.height,
+        });
         this.stopGame();
+        this.isRunning = false;
       }
     });
   }
   startGame() {
-    this.gameView.updateGameState({ isRunning: true });
-    if (!this.intervalId) {
-      this.intervalId = setInterval(() => {
-        this.updateGame();
-        if (this.checkStopConditionZero()) {
-          this.stopGame();
-        }
-      }, this.intervalTime);
-    }
+    this.stopGame();
+    this.intervalId = setInterval(() => {
+      this.updateGame();
+    }, this.intervalTime);
   }
   stopGame() {
-    this.gameView.updateGameState({ isRunning: false });
     if (this.intervalId) {
       clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.field = this.gameField.getState();
+      this.gameView.updateGameField(this.field);
     }
   }
   updateGame() {
@@ -68,7 +93,7 @@ class Game {
     for (let i = 0; i < this.field.length; i++) {
       for (let j = 0; j < this.field[i].length; j++) {
         if (this.field[i][j] !== 0) {
-          count = +1;
+          count += 1;
         }
       }
     }
